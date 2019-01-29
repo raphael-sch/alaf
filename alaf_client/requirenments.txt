@@ -1,0 +1,2 @@
+scikit-learn==0.20.2
+socketIO-client==0.7.2

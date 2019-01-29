@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+
+{% block navbarLeft %}
+    <div class="navbar-nav">
+        <a class="nav-item nav-link" href="/project/{{ project.id }}/overview">Overview</a>
+        <a class="nav-item nav-link" href="/project/{{ project.id }}/insights">Insights</a>
+        <a class="nav-item nav-link active" href="/project/{{ project.id }}/annotation">Annotation</a>
+    </div>
+    <div class="navbar-nav ml-auto">
+        <li class="nav-item dropdown show">
+        <a class="nav-link">
+          Project: {{ project.name }}
+        </a>
+        <div class="dropdown-menu dropdown-menu-right show"
+             ng-controller="AlafModelStatusController"
+             ng-init="model_status('{{project.id}}')">
+            <h6 class="dropdown-header">Model Connections:</h6>
+            <a class="dropdown-item" ng-repeat="model in models">
+                <div style="display: inline-block;">
+                    <span ng-bind="model.status ? 'on' : 'off'" class="badge"
+                          ng-class="model.status ? 'badge-success' : 'badge-danger'"></span>
+                </div>
+                <div style="display: inline-block;" ng-bind="model.name"></div>
+            </a>
+        </div>
+      </li>
+    </div>
+{% endblock %}
+
+
+{% block content %}
+    <div ng-controller="AlafAnnotationController">
+    <div class="row" ng-init="nextInstance()">
+        <div class="col-12 text-center">
+                <label for="tweet-box">Uttarance:</label>
+                <div ng-class="utterance == null ? 'fa fa-spinner fa-spin' : ''" ng-bind="utterance"></div>
+        </div>
+    </div>
+    <hr>
+    <div class="row">
+        <div class="col text-center">
+            <a class="btn btn-primary btn-lg" ng-click="annotate(0)" href="#" role="button">negative</a>
+        </div>
+        <div class="col text-center">
+            <a class="btn btn-primary btn-lg" ng-click="annotate(1)" href="#" role="button">positive</a>
+        </div>
+    </div>
+    </div>
+{% endblock %}
+

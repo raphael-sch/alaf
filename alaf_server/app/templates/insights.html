@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block addCSS %}
+    <link href="http://cdn.pydata.org/bokeh/release/bokeh-1.0.2.min.css" rel="stylesheet">
+    <link href="http://cdn.pydata.org/bokeh/release/bokeh-widgets-1.0.2.min.css" rel="stylesheet">
+{% endblock %}
+
+
+{% block navbarLeft %}
+    <div class="navbar-nav">
+        <a class="nav-item nav-link" href="/project/{{ project.id }}/overview">Overview</a>
+        <a class="nav-item nav-link active" href="/project/{{ project.id }}/insights">Insights</a>
+        <a class="nav-item nav-link" href="/project/{{ project.id }}/annotation">Annotation</a>
+    </div>
+    <span class="navbar-text ml-auto">
+      Project: {{ project.name }}
+    </span>
+{% endblock %}
+
+
+{% block content %}
+    <nav>
+        <div class="nav nav-tabs" id="nav-tab" role="tablist">
+            <a class="nav-item nav-link active" id="plot_score" data-toggle="tab" href="#nav-plot_score" role="tab">Score</a>
+            <a class="nav-item nav-link" id="plot_al_time" data-toggle="tab" href="#nav-plot_times" role="tab">Time</a>
+            <a class="nav-item nav-link" id="stats" data-toggle="tab" href="#nav-stats" role="tab">Stats</a>
+        </div>
+    </nav>
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="tab-content" id="nav-tabContent">
+                    <div class="tab-pane fade show active" id="nav-plot_score" role="tabpanel">
+                        <nav>
+                            <div class="nav nav-tabs" id="nav-tab-scores" role="tablist">
+                                <a class="nav-item nav-link active" id="plot_scores_f1" data-toggle="tab"
+                                   href="#nav-plot_scores_f1" role="tab">F1</a>
+                                <a class="nav-item nav-link" id="plot_scores_precision" data-toggle="tab"
+                                   href="#nav-plot_scores_precision" role="tab">Precision</a>
+                                <a class="nav-item nav-link" id="plot_scores_recall" data-toggle="tab"
+                                   href="#nav-plot_scores_recall" role="tab">Recall</a>
+                            </div>
+                        </nav>
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="tab-content" id="nav-tabContentScores">
+                                        <div class="tab-pane fade show active" id="nav-plot_scores_f1" role="tabpanel">
+                                            {{ div_scores_f1|safe }}
+                                            {{ script_scores_f1|safe }}
+                                        </div>
+                                        <div class="tab-pane fade show" id="nav-plot_scores_precision" role="tabpanel">
+                                            {{ div_scores_precision|safe }}
+                                            {{ script_scores_precision|safe }}
+                                        </div>
+                                        <div class="tab-pane fade show" id="nav-plot_scores_recall" role="tabpanel">
+                                            {{ div_scores_recall|safe }}
+                                            {{ script_scores_recall|safe }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="nav-plot_times" role="tabpanel">
+
+
+                        <nav>
+                            <div class="nav nav-tabs" id="nav-tab-times" role="tablist">
+                                <a class="nav-item nav-link active" id="plot_times_al" data-toggle="tab"
+                                   href="#nav-plot_times_al" role="tab">Active Learning</a>
+                                <a class="nav-item nav-link" id="plot_times_io" data-toggle="tab"
+                                   href="#nav-plot_times_io" role="tab">I/O</a>
+                                <a class="nav-item nav-link" id="plot_times_client" data-toggle="tab"
+                                   href="#nav-plot_times_client" role="tab">Client</a>
+                            </div>
+                        </nav>
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="tab-content" id="nav-tabContentScores">
+                                        <div class="tab-pane fade show active" id="nav-plot_times_al" role="tabpanel">
+                                            {{ div_al_time|safe }}
+                                            {{ script_al_time|safe }}
+                                        </div>
+                                        <div class="tab-pane fade show" id="nav-plot_times_io" role="tabpanel">
+                                            {{ div_io_time|safe }}
+                                            {{ script_io_time|safe }}
+                                        </div>
+                                        <div class="tab-pane fade show" id="nav-plot_times_client" role="tabpanel">
+                                            {{ div_client_time|safe }}
+                                            {{ script_client_time|safe }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+                    <div class="tab-pane fade" id="nav-stats" role="tabpanel">
+                        <table class="table table-hover">
+                            <thead class="thead-light">
+                            <tr>
+                                <th scope="col">Model Name</th>
+                                <th scope="col">Positive Annotations</th>
+                                <th scope="col">Negative Annotations</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for name, num_pos, num_neg in stats %}
+                                <tr>
+                                    <td>{{ name }}</td>
+                                    <td>{{ num_pos }}</td>
+                                    <td>{{ num_neg }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                        <div class="row">
+                            {{ div_pos_neg_plot|safe }}
+                            {{ script_pos_neg_plot|safe }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block addJS %}
+    <script src="http://cdn.pydata.org/bokeh/release/bokeh-1.0.2.min.js"></script>
+    <script src="http://cdn.pydata.org/bokeh/release/bokeh-widgets-1.0.2.min.js"></script>
+{% endblock %}

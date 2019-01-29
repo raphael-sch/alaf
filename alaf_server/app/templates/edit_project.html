@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% from 'bootstrap/form.html' import render_field %}
+
+
+{% block navbarLeft %}
+    {% if project is defined %}
+        <div class="navbar-nav">
+            <a class="nav-item nav-link active" href="/project/{{ project.id }}/overview">Overview</a>
+            <a class="nav-item nav-link" href="/project/{{ project.id }}/insights">Insights</a>
+            <a class="nav-item nav-link" href="/project/{{ project.id }}/annotation">Annotation</a>
+        </div>
+        <span class="navbar-text ml-auto">
+          Project: {{ project.name }}
+        </span>
+    {%endif %}
+{% endblock %}
+
+
+{% block content %}
+    <form method="post" action="{{ action }}" ng-controller="AlafEditProjectController">
+        {{ form.csrf_token() }}
+        <div class="row">
+            <div class="col">
+                {{ render_field(form.name) }}
+            </div>
+            <div class="col">
+                {{ render_field(form.max_count) }}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <div class="form-group" ng-init='init_models({{ models|tojson }}, {{ form.models.min_entries }}, {{ form.models.max_entries }})'>
+                    <label class="form-control-label">{{ form.models.label }}</label>
+                    <div data-ng-repeat="model in models track by $index">
+                        {% raw %}
+                        <input class="form-control" id="models-{{ $index }}-id" name="models-{{ $index }}-id" type="hidden" value="{{ model.id }}">
+                        <div class="d-flex">
+                            <input class="form-control mr-1 mt-2" ng-class="{'is-invalid' : model.errors.length}"
+                                   id="models-{{ $index }}-name" name="models-{{ $index }}-name" type="text"
+                                   ng-model="model.value">
+                            <button type="button" id="remove" class="btn btn-danger btn-sm mt-2"
+                                    ng-click="remove_model($index)" ng-bind="model.id?'delete':'remove'"></button>
+                        </div>
+                        <div class="d-flex invalid-feedback" ng-bind="error" data-ng-repeat="error in model.errors"></div>
+                        {% endraw %}
+                    </div>
+                    <button type="button" id="add" class="btn btn-success btn-sm mt-2" ng-click="add_model()">add</button>
+                </div>
+            </div>
+        </div>
+        <hr>
+        <div class="row">
+            <div class="col text-center">
+                {{ render_field(form.submit, button_map={'submit':'success'}) }}
+            </div>
+        </div>
+    </form>
+{% endblock %}

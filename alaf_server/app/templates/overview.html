@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% from 'bootstrap/form.html' import render_field %}
+
+
+{% block navbarLeft %}
+    <div class="navbar-nav">
+        <a class="nav-item nav-link active" href="/project/{{ project.id }}/overview">Overview</a>
+        <a class="nav-item nav-link" href="/project/{{ project.id }}/insights">Insights</a>
+        <a class="nav-item nav-link" href="/project/{{ project.id }}/annotation">Annotation</a>
+    </div>
+    <span class="navbar-text ml-auto">
+      Project: {{ project.name }}
+    </span>
+{% endblock %}
+
+
+{% block content %}
+    <div class="row">
+        <div class="col">
+            <label for="project_name">Project Name:</label>
+            <p class="bg-light" id="project_name">{{ project.name }}</p>
+        </div>
+        <div class="col">
+            <label for="number_of_instances:">Number of Instances:</label>
+            <p class="bg-light" id="number_of_instances">{{ project.max_count }}</p>
+        </div>
+    </div>
+    <div class="row" ng-controller="AlafModelStatusController">
+        <div class="col">
+            <label for="models">Models:</label>
+
+            <table id="models" class="table table-hover" data-ng-init="model_status('{{ project.id }}')">
+                <thead class="thead-light">
+                <tr>
+                    <th scope="col">Name</th>
+                    <th scope="col">Connections Status</th>
+                    <th scope="col">Annotations</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="model in models">
+                    <td ng-bind="model.name"></td>
+                    <td>                            <span ng-bind="model.status ? 'connected' : 'disconnected'"
+                                                          class="badge"
+                                                          ng-class="model.status ? 'badge-success' : 'badge-danger'"></span>
+                    </td>
+                    <td ng-bind="model.count"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <hr>
+    <div class="row">
+        <div class="col d-flex justify-content-center">
+            <a type="button" id="edit" class="btn btn-primary mr-3" href="/project/{{ project.id }}/edit">Edit</a>
+            <form method="post" action="/project/{{ project.id }}/overview">
+                {{ render_field(form.delete, button_map={'delete':'danger'}, onclick="return confirm('Are you sure?')") }}
+            </form>
+        </div>
+    </div>
+
+{% endblock %}
