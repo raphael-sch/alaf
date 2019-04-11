@@ -6,9 +6,10 @@
     {{ bootstrap.load_css() }}
     {% block addCSS %}{% endblock %}
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet"; href="https://unpkg.com/ng-table@2.0.2/bundles/ng-table.min.css">
 
 </head>
-<body>
+<body ng-keypress="annotateByKey($event)">
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <a class="navbar-brand" href="/">alaf</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
@@ -41,6 +42,8 @@
 </div>
 {{ bootstrap.load_js() }}
 <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.7.5/angular.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular-hotkeys/1.7.0/hotkeys.min.js"></script>
+<script src="https://unpkg.com/ng-table@2.0.2/bundles/ng-table.min.js"></script>
 <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 {% block addJS %}{% endblock %}
 </body>

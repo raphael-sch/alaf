@@ -1,5 +1,2 @@
 python3 -venv env
 source env/bin/activate
-pip install -r requirements.txt
-
-# python cmd.py -project project2 -name avg1_model_random -host localhost -port 5000 -model svm_random -data_dir ./data/SST2/ -output_dir ./models/

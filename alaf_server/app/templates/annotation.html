@@ -5,6 +5,7 @@
     <div class="navbar-nav">
         <a class="nav-item nav-link" href="/project/{{ project.id }}/overview">Overview</a>
         <a class="nav-item nav-link" href="/project/{{ project.id }}/insights">Insights</a>
+        <a class="nav-item nav-link" href="/project/{{ project.id }}/instances">Instances</a>
         <a class="nav-item nav-link active" href="/project/{{ project.id }}/annotation">Annotation</a>
     </div>
     <div class="navbar-nav ml-auto">
@@ -31,7 +32,7 @@
 
 {% block content %}
     <div ng-controller="AlafAnnotationController">
-    <div class="row" ng-init="nextInstance()">
+    <div class="row" ng-init="nextInstance()" hotkey="{right: annotatePos, left: annotateNeg, down: annotateSkip}">
         <div class="col-12 text-center">
                 <label for="tweet-box">Uttarance:</label>
                 <div ng-class="utterance == null ? 'fa fa-spinner fa-spin' : ''" ng-bind="utterance"></div>
@@ -42,10 +43,12 @@
         <div class="col text-center">
             <a class="btn btn-primary btn-lg" ng-click="annotate(0)" href="#" role="button">negative</a>
         </div>
+                <div class="col text-center">
+            <a class="btn btn-secondary btn-lg" ng-click="annotate(-1)" href="#" role="button">skip</a>
+        </div>
         <div class="col text-center">
             <a class="btn btn-primary btn-lg" ng-click="annotate(1)" href="#" role="button">positive</a>
         </div>
     </div>
     </div>
 {% endblock %}
-

@@ -3,13 +3,14 @@ from .models import Instance, Project
 
 from bokeh.plotting import figure
 from bokeh.embed import components
+import numpy as np
 
 colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2',
           '#7f7f7f', '#bcbd22', '#17becf', '#aec7e8', '#ffbb78', '#98df8a', '#ff9896',
           '#c5b0d5', '#c49c94', '#f7b6d2', '#c7c7c7', '#dbdb8d', '#9edae5']
 
 
-def get_plot(project_id, data_func, title, x_axis_label, y_axis_label, avg=False):
+def get_plot(project_id, data_func, title, x_axis_label, y_axis_label, avg=False, median=False):
     """
     Helper function to build plot using bokeh.
     :param project_id: project id
@@ -26,7 +27,6 @@ def get_plot(project_id, data_func, title, x_axis_label, y_axis_label, avg=False
     avg_data = dict()
     for i, model in enumerate(project.models):
         x_data, y_data = data_func(model)
-
         name = model.name
         if avg and name.startswith('avg'):
             name = 'avg ' + '_'.join(model.name.split('_')[1:])
@@ -42,8 +42,12 @@ def get_plot(project_id, data_func, title, x_axis_label, y_axis_label, avg=False
         if len(y[0]) > 1:
             name += ' ({})'.format(len(y[0]))
         y = [sum(e) / float(len(e)) for e in y]
+        if median:
+            median = np.median(y)
+            mean = np.mean(y)
+            name += '[median: {0:.1f}, mean: {1:.1f}]'.format(median, mean)
 
-        plot.line(x, y, legend=name, line_width=2, line_color=colors[i])
+        plot.line(x, y, legend=name, line_width=2, line_color=colors[i%len(colors)])
     plot.legend.location = "top_left"
     return components(plot)
 
@@ -97,6 +101,25 @@ def scores_recall_plot(project_id):
                     x_axis_label='number of AL instances',
                     y_axis_label='Recall score',
                     avg=True)
+
+
+def annotation_time_plot(project_id):
+    """
+    Build plot for annotation time.
+    :param project_id:
+    :return: bokeh components
+    """
+    def data_func(model):
+        instances = Instance.query.filter(db.and_(Instance.model_id == model.id,
+                                                  Instance.submit_time.isnot(None))).order_by(Instance.id).all()
+        return [i for i in range(len(instances))], [i.submit_time - i.show_time for i in instances]
+
+    return get_plot(project_id=project_id,
+                    data_func=data_func,
+                    title="Annotation time",
+                    x_axis_label='number of AL instances',
+                    y_axis_label='seconds',
+                    median=True)
 
 
 def al_time_plot(project_id):
@@ -159,6 +182,7 @@ def pos_neg_ratio_plot(project_id):
     def data_func(model):
         annotations = Instance.query.with_entities(Instance.annotation)\
             .filter(db.and_(Instance.annotation.isnot(None),
+                            Instance.annotation != -1,
                             Instance.model_id == model.id))\
             .order_by(Instance.id).all()
 

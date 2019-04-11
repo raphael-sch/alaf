@@ -81,7 +81,7 @@ class EditProjectForm(FlaskForm):
     max_count = IntegerField('Number of Instances', default=500)
     models = FieldList(FormField(ModelForm),
                        min_entries=1,
-                       max_entries=len(colors),
+                       max_entries=len(colors)*2,
                        validators=[DataRequired(), distinct('name', 'Model names have to be distinct')])
 
 

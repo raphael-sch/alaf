@@ -8,21 +8,21 @@ logging.basicConfig()
 
 class BaseALModel(object):
 
-    def __init__(self, project_name, name, host='localhost', port=5000, baseline=False):
+    def __init__(self, project_name, name, host='localhost', port=5000, simulation=False):
         """
-        Connect to the server and send initial scores. If baseline mode, start background thread
+        Connect to the server and send initial scores. If simulation mode, start background thread
         to send annotated instances and scores to the server. Wait for any events from the server.
         :param project_name: Name of the project
         :param name: name of this model/client
         :param host: host url/ip
         :param port: port of host
-        :param baseline: baseline mode
+        :param simulation: simulation mode
         """
         self.project_name = project_name
         self.name = name
         self.host = host
         self.port = port
-        self.baseline = baseline
+        self.simulation = simulation
 
         self.registered = False
 
@@ -38,11 +38,11 @@ class BaseALModel(object):
         self._connect()
         self._on_events()
 
-        print('start with scores: {} at count: {}'.format(scores, count))
+        logging.info('start with scores: {} at count: {}'.format(scores, count))
         self._emit_scores(scores, count)
 
-        if self.baseline:
-            threading.Thread(target=self._run_baseline, daemon=True).start()
+        if self.simulation:
+            threading.Thread(target=self._run_simulation, daemon=True).start()
 
         self.socketIO.wait()
 
@@ -102,7 +102,7 @@ class BaseALModel(object):
         Emits next selected utterance to server.
         :param message: utterance and annotation from server
         """
-        print('received: {}'.format(message))
+        logging.info('received: {}'.format(message))
         io_time_start = message['io_time_start']
         client_time_start = time.time()
         self.add_instance(utterance=message['utterance'],
@@ -111,7 +111,9 @@ class BaseALModel(object):
         scores = self.get_scores()
         self._emit_scores(scores)
 
-        self._emit_next_utterance(client_time_start, io_time_start)
+        self._emit_next_utterance(client_time_start,
+                                  io_time_start,
+                                  prev_annotation=message['annotation'])
 
     def _on_finished(self, message):
         """
@@ -119,7 +121,7 @@ class BaseALModel(object):
         :param message: cause
         """
         cause = message['cause']
-        print('Server is finished with client: {}'.format(cause))
+        logging.info('Server is finished with client: {}'.format(cause))
         self.socketIO.disconnect()
 
     def _on_next_utterance(self, message):
@@ -127,10 +129,11 @@ class BaseALModel(object):
         Select and emit the next utterance to the server.
         :param message: io_time_start: timestamp of serverside transmission start
         """
-        if self.baseline:
+        if self.simulation:
             return
         io_time_start = message['io_time_start']
-        self._emit_next_utterance(io_time_start)
+        self._emit_next_utterance(io_time_start,
+                                  prev_annotation=None)
 
     def _emit_register(self):
         """
@@ -147,19 +150,19 @@ class BaseALModel(object):
         :param client_time: total time spent on the client
         :param al_time: time spent for the al algorithm
         :param io_time_start: timestamp of serverside transmission start
-        :param label: is baseline mode, attach label
+        :param label: is simulation mode, attach label
         """
         count = self.get_count()
         message = {'utterance': utterance,
-                   'label': label if self.baseline else None,
+                   'label': label if self.simulation else None,
                    'count': count,
                    'client_time': client_time,
                    'al_time': al_time,
                    'io_time_start': io_time_start}
         self.namespace.emit('utterance', message)
-        print("Sent utterance '{}' at count {}".format(utterance, count))
+        logging.info("Sent utterance '{}' at count {}".format(utterance, count))
 
-    def _emit_next_utterance(self, client_time_start=None, io_time_start=None):
+    def _emit_next_utterance(self, client_time_start=None, io_time_start=None, prev_annotation=None):
         """
         Query the AL algorithm to get next utterance and send it to the server.
         Keeps track of different times during computations.
@@ -173,7 +176,7 @@ class BaseALModel(object):
             io_time_start = time.time()
 
         al_time_start = time.time()
-        utterance, label = self.get_next_utterance()
+        utterance, label = self.get_next_utterance(prev_annotation)
 
         time_end = time.time()
         client_time = time_end - client_time_start
@@ -198,9 +201,9 @@ class BaseALModel(object):
         precision, recall, f1 = scores
         message = {'precision': precision, 'recall': recall, 'f1': f1, 'count': count}
         self.namespace.emit('scores', message)
-        print("Sent scores {} at count {}".format(scores, count))
+        logging.info("Sent scores {} at count {}".format(scores, count))
 
-    def get_next_utterance(self):
+    def get_next_utterance(self, prev_annotation=None):
         """
         Override this in a custom model.
         :return: utterance, label/None
@@ -229,14 +232,15 @@ class BaseALModel(object):
         """
         raise NotImplementedError
 
-    def _run_baseline(self):
+    def _run_simulation(self):
         """
-        Baseline mode.
+        Simulation mode.
         Started in a separate thread. Instead of asking a human to label an instance,
         read it from a provided label file and send results to the server.
         """
+        label = None
         while True:
-            utterance, label = self._emit_next_utterance()
+            utterance, label = self._emit_next_utterance(label)
             self.add_instance(utterance, label)
 
             scores = self.get_scores()

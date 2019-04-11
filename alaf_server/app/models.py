@@ -22,11 +22,14 @@ class Instance(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     project_id = db.Column(db.Integer, db.ForeignKey('project.id'))
     model_id = db.Column(db.Integer, db.ForeignKey('model.id'))
-    utterance = db.Column(db.Text)
+    utterance = db.Column(db.Text, index=True)
     annotation = db.Column(db.Integer, nullable=True)
     client_time = db.Column(db.Float, nullable=True)
     al_time = db.Column(db.Float, nullable=True)
     io_time = db.Column(db.Float, nullable=True)
+    show_time = db.Column(db.Float, nullable=True)
+    submit_time = db.Column(db.Float, nullable=True)
+    copied = db.Column(db.Boolean, default=0)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

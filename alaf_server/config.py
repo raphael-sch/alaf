@@ -1,6 +1,6 @@
 import os
 
-DEBUG = True
+DEBUG = False
 
 # localhost for local and 0.0.0.0 for external access
 HOST = 'localhost'
@@ -16,5 +16,5 @@ DATABASE_CONNECT_OPTIONS = {}
 
 
 # secret key for form validation
-SECRET_KEY = "Yy7l6HjoXfWgfCNstQCdbz5rGctSK35C"
-WTF_CSRF_SECRET_KEY = "LVZYwwyXeBnYi1OHMu0kexxmlYW3hErp"
+SECRET_KEY = "your_secret_key"
+WTF_CSRF_SECRET_KEY = "your_other_secret_key"

@@ -6,6 +6,7 @@
     <div class="navbar-nav">
         <a class="nav-item nav-link active" href="/project/{{ project.id }}/overview">Overview</a>
         <a class="nav-item nav-link" href="/project/{{ project.id }}/insights">Insights</a>
+        <a class="nav-item nav-link" href="/project/{{ project.id }}/instances">Instances</a>
         <a class="nav-item nav-link" href="/project/{{ project.id }}/annotation">Annotation</a>
     </div>
     <span class="navbar-text ml-auto">
@@ -40,9 +41,10 @@
                 <tbody>
                 <tr ng-repeat="model in models">
                     <td ng-bind="model.name"></td>
-                    <td>                            <span ng-bind="model.status ? 'connected' : 'disconnected'"
-                                                          class="badge"
-                                                          ng-class="model.status ? 'badge-success' : 'badge-danger'"></span>
+                    <td>
+                        <span ng-bind="model.status ? 'connected' : 'disconnected'"
+                              class="badge"
+                              ng-class="model.status ? 'badge-success' : 'badge-danger'"></span>
                     </td>
                     <td ng-bind="model.count"></td>
                 </tr>
@@ -59,5 +61,4 @@
             </form>
         </div>
     </div>
-
 {% endblock %}

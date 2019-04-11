@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% from 'bootstrap/form.html' import render_field %}
+
+
+{% block navbarLeft %}
+    <div class="navbar-nav">
+        <a class="nav-item nav-link" href="/project/{{ project.id }}/overview">Overview</a>
+        <a class="nav-item nav-link" href="/project/{{ project.id }}/insights">Insights</a>
+        <a class="nav-item nav-link active" href="/project/{{ project.id }}/instances">Instances</a>
+        <a class="nav-item nav-link" href="/project/{{ project.id }}/annotation">Annotation</a>
+    </div>
+    <span class="navbar-text ml-auto">
+      Project: {{ project.name }}
+    </span>
+{% endblock %}
+
+
+{% block content %}
+    <div class="row">
+        <div class="col">
+            <label for="instances">Instances:</label>
+
+            <table id="instances" class="table table-hover">
+                <thead class="thead-light">
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Utterance</th>
+                    <th scope="col">Label</th>
+                    <th scope="col">Model</th>
+                    <th scope="col">C?</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for instance in instances %}
+                <tr>
+                    <td class="{{instance.clazz}}">{{ instance.id }}</td>
+                    <td class="{{instance.clazz}}">{{ instance.utterance }}</td>
+                    <td class="{{instance.clazz}}">{{ instance.annotation }}</td>
+                    <td class="{{instance.clazz}}">{{ instance.model}}</td>
+                    <td class="{{'table-dark' if instance.copied}}">{{ instance.copied}}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+{% endblock %}

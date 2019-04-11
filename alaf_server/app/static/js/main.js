@@ -2,7 +2,7 @@
 
     'use strict';
 
-    angular.module('ActiveLearningAnnotationFrameworkAPP', [])
+    angular.module('ActiveLearningAnnotationFrameworkAPP', ['cfp.hotkeys'])
 
         .controller('AlafAnnotationController', ['$scope', '$log', '$http', '$sce', '$timeout',
             function ($scope, $log, $http, $sce, $timeout) {
@@ -23,6 +23,15 @@
                         }
                     );
                 };
+                $scope.annotatePos = function (annotation) {
+                    $scope.annotate(1);
+                };
+                $scope.annotateNeg = function (annotation) {
+                    $scope.annotate(0);
+                };
+                $scope.annotateSkip = function (annotation) {
+                    $scope.annotate(-1);
+                };
 
                 $scope.nextInstance = function () {
 
@@ -37,11 +46,20 @@
                             $log.log('fail');
                             $scope.instance_id = null;
                             $scope.utterance = null;
-                            $timeout($scope.nextInstance, 3000, true);
+                            $timeout($scope.nextInstance, 1000, true);
                         }
                     );
 
                 };
+        $scope.annotateByKey = function(keyEvent) {
+            if (keyEvent.which === 65){
+                $log.log('press')
+                $scope.annotate(1);}
+            if (keyEvent.which === 76){
+                $scope.annotate(0);}
+            if (keyEvent.which === 71){
+                $scope.annotate(-1);}
+            }
 
             }
 

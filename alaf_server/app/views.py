@@ -3,10 +3,11 @@ from .models import Project, Instance, Model
 from .forms import EditProjectForm, DeleteProjectForm
 from .sockets import send_annotation
 from .plots import scores_f1_plot, scores_precision_plot, scores_recall_plot, \
-    al_time_plot, io_time_plot, client_time_plot, pos_neg_ratio_plot
+    al_time_plot, io_time_plot, client_time_plot, pos_neg_ratio_plot, annotation_time_plot
 
 from flask import request, jsonify, render_template, redirect, flash
 import json
+import time
 from random import choice
 
 
@@ -39,7 +40,7 @@ def project_overview(project_id):
         db.session.delete(project)
         db.session.commit()
         flash("Project '{}' deleted".format(project.name), 'danger')
-        return redirect('projects')
+        return redirect('/projects')
 
     return render_template('overview.html', project=project, form=form)
 
@@ -61,13 +62,16 @@ def project_insights(project_id):
     div_al_time, script_al_time = al_time_plot(project_id)
     div_io_time, script_io_time = io_time_plot(project_id)
     div_client_time, script_client_time = client_time_plot(project_id)
+    div_anno_time, script_anno_time = annotation_time_plot(project_id)
     # stats
     div_pos_neg_plot, script_pos_neg_plot = pos_neg_ratio_plot(project_id)
     stats = []
     for model in project.models:
         num_pos = Instance.query.filter(db.and_(Instance.annotation.is_(1), Instance.model_id == model.id)).count()
         num_neg = Instance.query.filter(db.and_(Instance.annotation.is_(0), Instance.model_id == model.id)).count()
-        stats.append((model.name, num_pos, num_neg))
+        num_skip = Instance.query.filter(db.and_(Instance.annotation.is_(-1), Instance.model_id == model.id)).count()
+        num_copied = Instance.query.filter(db.and_(Instance.copied.is_(1), Instance.model_id == model.id)).count()
+        stats.append((model.name, num_pos, num_neg, num_skip, num_copied))
 
     return render_template('insights.html', project=project,
                            div_scores_f1=div_scores_f1, script_scores_f1=script_scores_f1,
@@ -76,9 +80,33 @@ def project_insights(project_id):
                            div_al_time=div_al_time, script_al_time=script_al_time,
                            div_io_time=div_io_time, script_io_time=script_io_time,
                            div_client_time=div_client_time, script_client_time=script_client_time,
+                           div_anno_time=div_anno_time, script_anno_time=script_anno_time,
                            div_pos_neg_plot=div_pos_neg_plot, script_pos_neg_plot=script_pos_neg_plot,
                            stats=stats
                            )
+
+
+@app.route('/project/<int:project_id>/instances', methods=['GET', 'POST'])
+def project_instances(project_id):
+    """
+    Project overview with project name, max_count and automatically updated
+    model connection status.
+    :param project_id:
+    :return: render project overview
+    """
+    project = Project.query.get(project_id)
+    instances = Instance.query.filter_by(project_id=project_id).order_by(Instance.id.desc())
+    clazz = {0: 'table-danger', 1: 'table-success', None: 'table-dark', -1: ''}
+    rows = list()
+    for instance in instances:
+        rows.append(dict(id=instance.id,
+                         utterance=instance.utterance,
+                         annotation=instance.annotation,
+                         model=instance.model.name,
+                         clazz=clazz[instance.annotation],
+                         copied=int(instance.copied)))
+
+    return render_template('instances.html', project=project, instances=rows)
 
 
 @app.route('/project/<int:project_id>/annotation', methods=['GET', 'POST'])
@@ -160,6 +188,7 @@ def annotate():
     Receives annotation from the frontend.
     :return: empty response
     """
+    submit_time = time.time()
     data = json.loads(request.data.decode())
     annotation = data["annotation"]  # int
     instance_id = data["instance_id"]
@@ -169,7 +198,9 @@ def annotate():
 
     instance = Instance.query.get(instance_id)
     instance.annotation = annotation
+    instance.submit_time = submit_time
     db.session.commit()
+    print(annotation)
 
     send_annotation(instance)
     return jsonify({})
@@ -184,7 +215,7 @@ def next_instance(project_id):
     """
     instances = Instance.query.filter(db.and_(Instance.annotation.is_(None),
                                               Instance.project_id == project_id)).all()
-    max_count_diff = 5
+    max_count_diff = 500
     if len(instances) == 0:
         message = "No instance without annotation left"
         print(message)
@@ -194,11 +225,14 @@ def next_instance(project_id):
     # check the difference in annotated instances (count) between
     # model with lowest count and highest count
     if models[-1].count - models[0].count > max_count_diff:
-        instances = list(filter(lambda i: i.model_id == models[0].id, instances))
+        instances = list(filter(lambda i: i.model.count - models[0].count < max_count_diff, instances))
         if len(instances) == 0:
             raise AttributeError('Count difference higher than {}'.format(max_count_diff))
 
     instance = choice(instances)
+    instance.show_time = time.time()
+    db.session.commit()
+
     return jsonify({'instance_id': instance.id,
                     'utterance': instance.utterance})
 

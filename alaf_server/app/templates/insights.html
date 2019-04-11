@@ -10,6 +10,7 @@
     <div class="navbar-nav">
         <a class="nav-item nav-link" href="/project/{{ project.id }}/overview">Overview</a>
         <a class="nav-item nav-link active" href="/project/{{ project.id }}/insights">Insights</a>
+        <a class="nav-item nav-link" href="/project/{{ project.id }}/instances">Instances</a>
         <a class="nav-item nav-link" href="/project/{{ project.id }}/annotation">Annotation</a>
     </div>
     <span class="navbar-text ml-auto">
@@ -73,6 +74,8 @@
                                    href="#nav-plot_times_io" role="tab">I/O</a>
                                 <a class="nav-item nav-link" id="plot_times_client" data-toggle="tab"
                                    href="#nav-plot_times_client" role="tab">Client</a>
+                                <a class="nav-item nav-link" id="plot_times_anno" data-toggle="tab"
+                                   href="#nav-plot_times_anno" role="tab">Annotation</a>
                             </div>
                         </nav>
                         <div class="container">
@@ -91,6 +94,10 @@
                                             {{ div_client_time|safe }}
                                             {{ script_client_time|safe }}
                                         </div>
+                                        <div class="tab-pane fade show" id="nav-plot_times_anno" role="tabpanel">
+                                            {{ div_anno_time|safe }}
+                                            {{ script_anno_time|safe }}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -105,14 +112,18 @@
                                 <th scope="col">Model Name</th>
                                 <th scope="col">Positive Annotations</th>
                                 <th scope="col">Negative Annotations</th>
+                                <th scope="col">Skipped Instances</th>
+                                <th scope="col">Copied</th>
                             </tr>
                             </thead>
                             <tbody>
-                            {% for name, num_pos, num_neg in stats %}
+                            {% for name, num_pos, num_neg, num_skip, num_copied in stats %}
                                 <tr>
                                     <td>{{ name }}</td>
                                     <td>{{ num_pos }}</td>
                                     <td>{{ num_neg }}</td>
+                                    <td>{{ num_skip }}</td>
+                                <td>{{ num_copied }}</td>
                                 </tr>
                             {% endfor %}
                             </tbody>

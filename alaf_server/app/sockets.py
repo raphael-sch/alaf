@@ -16,6 +16,7 @@ def receive_utterance(message):
     al_time = message['al_time']
     io_time = (time.time() - message['io_time_start']) - client_time
     count = message['count']
+    utterance = message['utterance']
     model = Model.query.filter_by(sid=request.sid).one_or_none()
     project = Project.query.get(model.project_id)
 
@@ -30,18 +31,43 @@ def receive_utterance(message):
         db.session.commit()
         return
 
-    model.count = count
     # default None. Clients can send annotation in case of baselines from annotated data
     annotation = message.get('label')
-    instance = Instance(utterance=message['utterance'],
+
+    show_time = None
+    submit_time = None
+    copied = 0
+    found_instance = None
+
+    # code to copy already labeled instances if present in database.
+    # TODO: add option to activate this in project settings
+    # if instance found in db, use this label
+    #found_instance = Instance.query.filter_by(utterance=utterance).first()
+    #if found_instance is not None and annotation is None:
+    #    annotation = found_instance.annotation
+    #    show_time = time.time()
+    #    submit_time = show_time + (found_instance.submit_time - found_instance.show_time)
+    #    copied = 1
+
+    model.count = count
+    instance = Instance(utterance=utterance,
                         annotation=annotation,
                         project_id=model.project_id,
                         model_id=model.id,
                         client_time=client_time,
                         al_time=al_time,
-                        io_time=io_time)
+                        io_time=io_time,
+                        show_time=show_time,
+                        submit_time=submit_time,
+                        copied=copied)
     db.session.add(instance)
     db.session.commit()
+
+    # instance was found in database and automatically labeled
+    if found_instance is not None and message.get('label') is None and annotation is not None:
+        print('instance found in database, label: {}'.format(annotation))
+        send_annotation(instance)
+
     print(message)
 
 
@@ -127,6 +153,9 @@ def send_annotation(instance):
     :param instance:
     :return:
     """
+    if instance.annotation is None:
+        print('tried to send instance without annotation: {}'.format(instance))
+        return
     model = Model.query.get(instance.model_id)
     io_time_start = time.time()
     message = {'utterance': instance.utterance,
