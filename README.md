@@ -4,10 +4,14 @@
 - Python 3.6
 - SQLite
 
-    pip install -r requirements.txt
+
+```
+pip install -r requirements.txt
     
-    #if sqlite not installed:
-    sudo apt-get install sqlite
+#if sqlite not installed:
+sudo apt-get install sqlite
+
+```
 ### Prepare
     # update secret keys in config.py
     python install.py
@@ -19,10 +23,13 @@
 ### Requirements
 - Python 3.6
 
+```
+pip install -r requirements.txt
+#The svm example models need sklearn:
+pip install scikit-learn
 
-    pip install -r requirements.txt
-    #The svm example models need sklearn:
-    pip install scikit-learn
+```
+    
 ### Prepare
 - start server
 ### Run
