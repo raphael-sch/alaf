@@ -1,5 +1,5 @@
 # ALAF: Active Learning Annotation Framework
-## Server
+## Server:
 ### Requirements
 - Python 3.6
 - SQLite
@@ -18,7 +18,7 @@ sudo apt-get install sqlite
     python run.py
     #open host:port (e.g. http://localhost:5000 in browser)
     
-## Client
+## Client:
 ### Requirements
 - Python 3.6
 
