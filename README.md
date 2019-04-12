@@ -10,7 +10,6 @@ pip install -r requirements.txt
     
 #if sqlite not installed:
 sudo apt-get install sqlite
-
 ```
 ### Prepare
     # update secret keys in config.py
@@ -27,7 +26,6 @@ sudo apt-get install sqlite
 pip install -r requirements.txt
 #The svm example models need sklearn:
 pip install scikit-learn
-
 ```
     
 ### Prepare
