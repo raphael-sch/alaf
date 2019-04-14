@@ -13,8 +13,9 @@ RUN pip3 install gunicorn eventlet
 
 EXPOSE 5000
 
-COPY run.py config.py /app/
+COPY run.py config.py install.py /app/
 
-CMD gunicorn -b 0.0.0.0:5000 --worker-class eventlet -w 1 --timeout 30 --access-logfile - "run:app"
+CMD python3 install.py && gunicorn -b 0.0.0.0:5000 --worker-class eventlet -w 1 --timeout 30 --access-logfile - "run:app"
 
+#docker build -t alaf .
 #docker run -d -v db:/app/db -p 80:5000 alaf:latest
