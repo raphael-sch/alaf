@@ -1,4 +1,6 @@
 # ALAF: Active Learning Annotation Framework
+Download report for more information:
+https://www.dropbox.com/s/ktihn5hnq3bxhmp/alaf.pdf?dl=1
 ## Server:
 ### Requirements
 - Python 3.6
